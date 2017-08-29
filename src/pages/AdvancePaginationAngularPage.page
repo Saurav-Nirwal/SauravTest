@@ -1,0 +1,373 @@
+<apex:page controller="AdvancePaginationAngularController" showHeader="false">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.js"/>
+    <apex:slds >
+        <style>
+            .updateClass {
+                background-color: lightgreen;
+            }
+            .deleteClass {
+                background: red !important;
+            }
+            .animate {
+                -webkit-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+                -moz-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+                -ms-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+                -o-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+                transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+                position: relative;
+
+            }
+            .animate.ng-leave.ng-leave-active,
+            .animate.ng-enter {
+                -webkit-transform: rotateX(90deg) rotateZ(90deg);
+                -moz-transform: rotateX(90deg) rotateZ(90deg);
+                -ms-transform: rotateX(90deg) rotateZ(90deg);
+                -o-transform: rotateX(90deg) rotateZ(90deg);
+                transform: rotateX(90deg) rotateZ(90deg);
+                opacity: 0;
+                height: 0px;
+            }
+            .animate.ng-enter.ng-enter-active,
+            .animate.ng-leave {
+                -webkit-transform: rotateX(0deg) rotateZ(0deg);
+                -moz-transform: rotateX(0deg) rotateZ(0deg);
+                -ms-transform: rotateX(0deg) rotateZ(0deg);
+                -o-transform: rotateX(0deg) rotateZ(0deg);
+                transform: rotateX(0deg) rotateZ(0deg);
+                opacity: 1;
+                height: 30px;
+            }
+        </style>
+        <div ng-app="accApp" ng-controller="acccontroller" ng-cloak="true"> <!--ng-init="searchAccounts()" -->
+            <div class="slds-spinner_container slds-hide" id="spinner">
+                <div class="slds-spinner--brand slds-spinner slds-spinner--medium" role="alert">
+                    <span class="slds-assistive-text">Loading</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
+            <div>
+                <button type="button" class="slds-button slds-button_neutral" ng-click="massEdit();">Mass  Edit</button>
+                <button type="submit" class="slds-button slds-button_neutral" ng-click="saveRecord()" ng-show="btnShow">Save</button>
+                <button type="button" class="slds-button slds-button_neutral" ng-click="cancelRecord()" ng-show="btnShow">Cancel</button>
+                <div class="slds-input-has-icon slds-input-has-icon--right" style="width:15%; float:right;">
+                    <div xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                                <use xlink:href="{!URLFOR($Resource.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#search')}"></use>
+                        </svg>
+                        <input type="text" placeholder="Search" ng-model="search" class="slds-input"/>
+                    </div>
+                </div>
+            </div>
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                <thead>
+                    <tr class="slds-text-title_caps">
+                        <th scope="col" style="cursor: pointer;">
+                            <div class="slds-truncate" title="Action">Action</div>
+                        </th>
+                        <th scope="col" ng-click="orderByMe('Name')" style="cursor: pointer;">
+                            <div class="slds-truncate" title="Name">Name</div>
+                        </th>
+                        <th scope="col" ng-click="orderByMe('Phone')" style="cursor: pointer;">
+                            <div class="slds-truncate" title="Phone">Phone</div>
+                        </th>
+                        <th scope="col" ng-click="orderByMe('Type')" style="cursor: pointer;">
+                            <div class="slds-truncate" title="Type">Type</div>
+                        </th>
+                        <th scope="col" ng-click="orderByMe('BillingCountry')" style="cursor: pointer;">
+                            <div class="slds-truncate" title="Billing Country">Billing Country</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="animate" ng-repeat="x in customers | orderBy:myOrderBy | filter:search">
+                        <td data-label="Account Name">
+                            <button class="slds-button slds-button_icon slds-icon-action-edit slds-icon_container--circle" title="Edit" ng-click="editRecordFunct(x);">
+                                <div xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.SLDS, '/assets/icons/action-sprite/svg/symbols.svg#edit')}"></use>
+                                    </svg>
+                                </div>
+                            </button>&nbsp;
+                            <button class="slds-button slds-button_icon slds-icon-action-canvas slds-icon_container--circle" ng-class="{deleteClass : x.Delete}" title="Delete" ng-click="deleteRecord(x);">
+                                <div xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.SLDS, '/assets/icons/action-sprite/svg/symbols.svg#delete')}"></use>
+                                    </svg>
+                                </div>
+                            </button>
+                        </td>
+                        <td data-label="Account Name">
+                            <span ng-class="{updateClass : updateClass($index,'Name')}">{{x.Name}}</span>
+                        </td>
+                        <td data-label="Close Date">
+                            <span ng-class="{updateClass : updateClass($index,'Phone')}">{{x.Phone}}</span>
+                        </td>
+                        <td data-label="Prospecting">
+                            <span ng-class="{updateClass : updateClass($index,'Type')}">{{x.Type}}</span>
+                        </td>
+                        <td data-label="Confidence">
+                            <div class="slds-truncate" title="{{x.BillingCountry}}">{{x.BillingCountry}}</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table><br/>
+            <div class="slds-grid slds-grid_align-center">
+                <ul class="slds-button-group-list">
+                    <li ng-repeat='item in pagingObject.pagearray'>
+                        <button class="slds-button slds-button_neutral" ng-class="{'slds-button_brand': item === criteria.page}"  ng-if="item == 'Prev'" ng-click="setCurrent(criteria.page - 1)" ng-disabled="criteria.page == 1">Prev</button>
+                        <button class="slds-button slds-button_neutral" ng-class="{'slds-button_brand': item === criteria.page}" ng-if="(!(item == 'Prev' || item == 'Next' ||  item == '..' || item == '...'))"
+                           ng-click="criteria.page = item;">{{item}}</button>
+                        <button class="slds-button slds-button_neutral" ng-class="{'slds-button_brand': item === criteria.page}" ng-if="(item == '..' || item == '...')">{{item}}</button>
+                        <button class="slds-button slds-button_neutral" ng-class="{'slds-button_brand': item === criteria.page}" ng-if="item == 'Next'" ng-disabled="(criteria.page < pagingObject.totalpages) ? false : true" ng-click="setCurrent(criteria.page + 1)">Next</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="slds-grid" style="background-color: #f1e1d1; padding: 7px;">
+                <div class="slds-col">
+                    Showing: {{(criteria.page -1) * criteria.pagesize + 1}} -
+                     {{ ((criteria.page -1) * criteria.pagesize + pagingObject.showing)}}
+                        of {{pagingObject.total}} Records
+                </div>
+                <div class="slds-col slds-text-align--right" >
+                    Page: <input type='number'
+                         ng-model='criteria.page'
+                         min="1"
+                         max="{{pagingObject.totalpages}}"
+                          class="slds-input" style="width: fit-content;" />
+                            of {{pagingObject.totalpages}}
+                            with page size <select ng-model="criteria.pagesize"
+                          ng-options="obj for obj in pagingObject.pagingOptions" class="slds-select" style="width: fit-content;" />
+                </div>
+            </div>
+            <div class="demo-only">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" id="massEditDiv" class="slds-modal slds-fade-in-close">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" ng-click="hideModal('massEditFadeDiv','massEditDiv');">
+                                <div xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                                    </svg>
+                                </div>
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Edit Account</h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <label class="slds-form-element__label">Name:</label>
+                            <input class="slds-input" type="text" ng-model="editRecord.Name" placeholder="Name" />
+                            <label class="slds-form-element__label">Phone:</label>
+                            <input class="slds-input" type="text" ng-model="editRecord.Phone" placeholder="Phone" />
+                            <label class="slds-form-element__label">Type:</label>
+                            <input class="slds-input" type="text" ng-model="editRecord.Type" placeholder="Type" />
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button class="slds-button slds-button_neutral" ng-click="cancelUpdate()">Cancel</button>
+                            <button class="slds-button slds-button_brand" ng-click="updateChanges();">Save</button>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_close" id="massEditFadeDiv"></div>
+            </div>
+        </div>
+    </apex:slds>
+    <script type="text/javascript">
+        var myapp = angular.module('accApp', ['ngAnimate']);
+        myapp.controller('acccontroller',['$scope', '$filter', function($scope, $filter) {
+            $scope.accList = {!accList};
+            $scope.oldAccList = {!accList};
+            $scope.btnShow = false;
+            $scope.editRecord = {};
+            $scope.criteria={
+              searchtext:'',
+              page: 1,
+              pagesize: 5,
+              sort: 'Name',
+              desc : false
+            };
+            $scope.pagingObject ={
+              total : 0,
+              totalpages: 0,
+              showing: 0,
+              pagearray: [],
+              pagingOptions: [5,10,20,30,40,50]
+            };
+            $scope.searchAccounts = function () {
+                for(var i = 0; i < $scope.accList.length; i++){
+                    if(!$scope.accList[i].hasOwnProperty('Delete'))
+                        $scope.accList[i]['Delete'] = false;
+                }
+                $scope.customers =  ($filter('filter')($scope.accList, {Name: $scope.criteria.searchtext }));
+                $scope.pagingObject.total = $scope.customers.length;
+                var a = ($scope.criteria.page - 1) * $scope.criteria.pagesize;
+                var b = $scope.criteria.page  * $scope.criteria.pagesize;
+                $scope.customers = $scope.customers.slice( a, b );
+                $scope.pagingObject.showing = $scope.customers.length;
+                $scope.paging($scope.criteria.page, $scope.criteria.pagesize, $scope.pagingObject.total);
+            };
+
+            $scope.$watch('criteria', function(newValue, oldValue){
+              if(!angular.equals(newValue, oldValue)){
+                  $scope.searchAccounts();
+              }
+            }, true);
+
+            $scope.massEdit = function() {
+                var record = {'Name':'','Phone':'','Type':''};
+                $scope.editRecord = record;
+                $scope.showModal('massEditFadeDiv','massEditDiv');
+            }
+            $scope.updateClass = function(index, key) {
+                var oldRecordArray = $scope.oldAccList;
+                var newRecordArray = $scope.customers;
+                if(oldRecordArray[index][key] != newRecordArray[index][key]){
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            $scope.setCurrent = function(pageNumber) {
+                $scope.criteria.page = pageNumber;
+            }
+            $scope.updateChanges = function() {
+                $scope.showSpinner();
+                var log = [];
+                angular.forEach($scope.customers, function(value, index) {
+                    var obj = {};
+                    angular.forEach(value, function(newValue, key) {
+                        obj[key] = newValue;
+                        if(key == 'Name' || key == 'Phone' || key == 'Type') {
+                            if($scope.editRecord[key] != null && $scope.editRecord[key] != ''){
+                                    obj[key] = $scope.editRecord[key];
+                            }
+                        }
+                    });
+                    this.push(obj);
+                }, log);
+                //$scope.accList = log;
+                console.log(log);
+                //$scope.customers =  ($filter('filter')(log, {Name: $scope.criteria.searchtext }));
+                $scope.searchAccounts();
+                $scope.hideModal('massEditFadeDiv','massEditDiv');
+                $scope.btnShow = true;
+                $scope.hideSpinner();
+            }
+            $scope.cancelRecord = function() {
+                $scope.customers =  ($filter('filter')($scope.accList, {Name: $scope.criteria.searchtext }));
+                $scope.btnShow = false;
+            }
+            $scope.cancelUpdate = function() {
+                $scope.hideModal('massEditFadeDiv','massEditDiv');
+            }
+            $scope.orderByMe = function(x) {
+                $scope.myOrderBy = x;
+            }
+            $scope.editRecordFunct = function(record) {
+                $scope.editRecord = record;
+                $scope.showModal('massEditFadeDiv','massEditDiv');
+            }
+            $scope.deleteRecord = function(record) {
+                $scope.btnShow = true;
+                if (record['Delete']){
+                    record['Delete'] = false;
+                }
+                else{
+                    record['Delete'] = true;
+                }
+            }
+            $scope.saveRecord = function(record) {
+                $scope.showSpinner();
+                var deleteArray = [];
+                var updateArray = [];
+                angular.forEach($scope.customers, function(value, index) {
+                    angular.forEach(value, function(newValue, key) {
+                        if(newValue['Delete']) {
+                            delete newValue.Delete;
+                            deleteArray.push(newValue);
+                        }
+                        else {
+                            delete newValue.Delete;
+                            updateArray.push(newValue);
+                        }
+                    });
+                }, deleteArray);
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.AdvancePaginationAngularController.getSaveAccounts}',angular.toJson(deleteArray),angular.toJson(updateArray),function(result, event){
+                    if (event.status) {
+                        $scope.accList = result;
+                        $scope.searchAccounts();
+                    } else if (event.type === 'exception') {
+                        alert(result);
+                    }
+                    $scope.hideSpinner();
+                    $scope.$apply();
+                });
+            }
+            $scope.showSpinner = function() {
+                var spinner = angular.element("#spinner");
+                spinner.removeClass('slds-hide');
+            }
+            $scope.hideSpinner = function() {
+                var spinner = angular.element("#spinner");
+                spinner.addClass('slds-hide');
+            }
+            $scope.hideModal = function(fadeDivClass,modalDivClass) {
+                angular.element("#"+modalDivClass).addClass("slds-fade-in-close");
+                angular.element("#"+fadeDivClass).addClass("slds-backdrop_close");
+                angular.element("#"+fadeDivClass).removeClass("slds-backdrop_open");
+                angular.element("#"+modalDivClass).removeClass("slds-fade-in-open");
+            }
+            $scope.showModal = function(fadeDivClass,modalDivClass) {
+                angular.element("#"+modalDivClass).addClass("slds-fade-in-open");
+                angular.element("#"+fadeDivClass).addClass("slds-backdrop_open");
+                angular.element("#"+fadeDivClass).removeClass("slds-backdrop_close");
+                angular.element("#"+modalDivClass).removeClass("slds-fade-in-close");
+            }
+            $scope.paging = function (current, pagesize, total){
+                var totalpages = Math.ceil(total/pagesize);
+                $scope.pagingObject.totalpages = totalpages;
+                // clear it before playing
+                $scope.pagingObject.pagearray = [];
+                if(totalpages <=1) return;
+
+                if(totalpages <= 5){
+                    for(var i =1; i<= totalpages; i++)
+                        $scope.pagingObject.pagearray.push(i);
+                }
+
+                if(totalpages > 5){
+                    if(current <=3){
+                        for(var i =1; i<= 5; i++)
+                            $scope.pagingObject.pagearray.push(i);
+
+                            $scope.pagingObject.pagearray.push('...');
+                            $scope.pagingObject.pagearray.push(totalpages);
+                            $scope.pagingObject.pagearray.push('Next');
+                    }
+                    else if(totalpages - current <=3){
+                        $scope.pagingObject.pagearray.push('Prev');
+                        $scope.pagingObject.pagearray.push(1);
+                        $scope.pagingObject.pagearray.push('..');
+                        for(var i =totalpages - 4; i<= totalpages; i++)
+                            $scope.pagingObject.pagearray.push(i);
+                    }
+                    else {
+                        $scope.pagingObject.pagearray.push('Prev');
+                        $scope.pagingObject.pagearray.push(1);
+                        $scope.pagingObject.pagearray.push('..');
+
+                        for(var i = current - 2; i<= current + 2; i++)
+                            $scope.pagingObject.pagearray.push(i);
+
+                            $scope.pagingObject.pagearray.push('...');
+                            $scope.pagingObject.pagearray.push(totalpages);
+                            $scope.pagingObject.pagearray.push('Next');
+                      }
+                  }
+              }
+            $scope.searchAccounts();
+        }]);
+    </script>
+</apex:page>
