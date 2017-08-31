@@ -17,7 +17,7 @@
 		<link rel="stylesheet" href="{!URLFOR($Resource.AngularApp)}/styles/semantic.min.css" media="screen" charset="utf-8" />
 	</head>
 	<body>
-		<app>Loading...</app>
+		<app>Loading...</app>        
 
 		<script src="{!URLFOR($Resource.NodeModules)}/core-js/client/shim.min.js"></script>
     <script src="{!URLFOR($Resource.NodeModules)}/zone.js/dist/zone.js"></script>
